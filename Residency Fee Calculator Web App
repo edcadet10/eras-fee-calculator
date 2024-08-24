@@ -1,102 +1,109 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { PlusCircle, Trash2 } from 'lucide-react';
-
-const SpecialtyInput = ({ specialty, count, onChange, onRemove }) => (
-  <div className="mb-4 flex items-center space-x-2">
-    <Input
-      type="text"
-      value={specialty}
-      onChange={(e) => onChange('specialty', e.target.value)}
-      placeholder="Specialty name"
-      className="flex-grow"
-    />
-    <Input
-      type="number"
-      value={count}
-      onChange={(e) => onChange('count', e.target.value)}
-      min="0"
-      placeholder="# of programs"
-      className="w-32"
-    />
-    <Button variant="ghost" size="icon" onClick={onRemove} className="text-red-600 hover:text-red-800">
-      <Trash2 className="h-4 w-4" />
-    </Button>
-  </div>
-);
-
-const ResidencyFeeCalculator = () => {
-  const [specialties, setSpecialties] = useState([
-    { id: 1, specialty: '', count: 0 },
-  ]);
-
-  const calculateFee = (count) => {
-    if (count <= 30) return count * 11;
-    return 30 * 11 + (count - 30) * 30;
-  };
-
-  const totalFee = specialties.reduce(
-    (sum, { count }) => sum + calculateFee(parseInt(count) || 0),
-    0
-  );
-
-  const handleInputChange = (id, field, value) => {
-    setSpecialties((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, [field]: value } : s))
-    );
-  };
-
-  const addSpecialty = () => {
-    setSpecialties((prev) => [
-      ...prev,
-      { id: Date.now(), specialty: '', count: 0 },
-    ]);
-  };
-
-  const removeSpecialty = (id) => {
-    setSpecialties((prev) => prev.filter((s) => s.id !== id));
-  };
-
-  return (
-    <div className="min-h-screen bg-[#f8f8f8] flex items-center justify-center p-4">
-      <Card className="w-full max-w-2xl bg-white rounded-lg shadow-lg overflow-hidden">
-        <CardHeader className="bg-[#34495E] text-white px-6 py-4">
-          <CardTitle className="text-2xl font-bold">
-            2025 ERAS® Residency Fee Calculator
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-6">
-          <p className="text-sm text-gray-600 mb-4">
-            ERAS® application fees are based on the number of programs applied to per specialty. 
-            Enter your specialties and program counts below to calculate your fees.
-          </p>
-          {specialties.map(({ id, specialty, count }) => (
-            <SpecialtyInput
-              key={id}
-              specialty={specialty}
-              count={count}
-              onChange={(field, value) => handleInputChange(id, field, value)}
-              onRemove={() => removeSpecialty(id)}
-            />
-          ))}
-          <Button onClick={addSpecialty} className="w-full mt-4 bg-[#34495E] hover:bg-[#2C3E50] text-white">
-            <PlusCircle className="mr-2 h-4 w-4" /> Add Specialty
-          </Button>
-          <div className="mt-6 p-4 bg-[#F2F6FA] rounded-lg">
-            <p className="text-lg font-semibold text-[#34495E]">
-              Total Estimated Fee: ${totalFee}
-            </p>
-            <p className="text-xs text-gray-600 mt-2">
-              Fees are automatically calculated in the MyERAS® portal. You can pay online using Visa, MasterCard, American Express, or Discover.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2025 ERAS® Residency Fee Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f8f8;
+        }
+        .calculator {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #34495E;
+            text-align: center;
+        }
+        .specialty-input {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        input {
+            flex-grow: 1;
+            padding: 8px;
+            margin-right: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #34495E;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #2C3E50;
+        }
+        .total-fee {
+            margin-top: 20px;
+            font-weight: bold;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <h1>2025 ERAS® Residency Fee Calculator</h1>
+        <p>Enter your specialties and program counts below to calculate your fees.</p>
+        <div id="specialties"></div>
+        <button onclick="addSpecialty()">Add Specialty</button>
+        <div class="total-fee" id="totalFee"></div>
     </div>
-  );
-};
 
-export default ResidencyFeeCalculator;
+    <script>
+        let specialties = [{ id: 1, specialty: '', count: 0 }];
+
+        function renderSpecialties() {
+            const specialtiesDiv = document.getElementById('specialties');
+            specialtiesDiv.innerHTML = specialties.map(s => `
+                <div class="specialty-input">
+                    <input type="text" value="${s.specialty}" onchange="updateSpecialty(${s.id}, 'specialty', this.value)" placeholder="Specialty name">
+                    <input type="number" value="${s.count}" onchange="updateSpecialty(${s.id}, 'count', this.value)" min="0" placeholder="# of programs">
+                    <button onclick="removeSpecialty(${s.id})">Remove</button>
+                </div>
+            `).join('');
+            calculateTotal();
+        }
+
+        function addSpecialty() {
+            specialties.push({ id: Date.now(), specialty: '', count: 0 });
+            renderSpecialties();
+        }
+
+        function removeSpecialty(id) {
+            specialties = specialties.filter(s => s.id !== id);
+            renderSpecialties();
+        }
+
+        function updateSpecialty(id, field, value) {
+            specialties = specialties.map(s => s.id === id ? {...s, [field]: value} : s);
+            calculateTotal();
+        }
+
+        function calculateFee(count) {
+            count = parseInt(count) || 0;
+            if (count <= 30) return count * 11;
+            return 30 * 11 + (count - 30) * 30;
+        }
+
+        function calculateTotal() {
+            const total = specialties.reduce((sum, s) => sum + calculateFee(s.count), 0);
+            document.getElementById('totalFee').innerText = `Total Estimated Fee: $${total}`;
+        }
+
+        renderSpecialties();
+    </script>
+</body>
+</html>
