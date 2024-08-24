@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2025 ERAS® Residency Fee Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f8f8;
+        }
+        .calculator {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #34495E;
+            text-align: center;
+        }
+        .specialty-input {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        input {
+            flex-grow: 1;
+            padding: 8px;
+            margin-right: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #34495E;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #2C3E50;
+        }
+        .total-fee {
+            margin-top: 20px;
+            font-weight: bold;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <h1>2025 ERAS® Residency Fee Calculator</h1>
+        <p>Enter your specialties and program counts below to calculate your fees.</p>
+        <div id="specialties"></div>
+        <button onclick="addSpecialty()">Add Specialty</button>
+        <div class="total-fee" id="totalFee"></div>
+    </div>
+
+    <script>
+        let specialties = [{ id: 1, specialty: '', count: 0 }];
+
+        function renderSpecialties() {
+            const specialtiesDiv = document.getElementById('specialties');
+            specialtiesDiv.innerHTML = specialties.map(s => `
+                <div class="specialty-input">
+                    <input type="text" value="${s.specialty}" onchange="updateSpecialty(${s.id}, 'specialty', this.value)" placeholder="Specialty name">
+                    <input type="number" value="${s.count}" onchange="updateSpecialty(${s.id}, 'count', this.value)" min="0" placeholder="# of programs">
+                    <button onclick="removeSpecialty(${s.id})">Remove</button>
+                </div>
+            `).join('');
+            calculateTotal();
+        }
+
+        function addSpecialty() {
+            specialties.push({ id: Date.now(), specialty: '', count: 0 });
+            renderSpecialties();
+        }
+
+        function removeSpecialty(id) {
+            specialties = specialties.filter(s => s.id !== id);
+            renderSpecialties();
+        }
+
+        function updateSpecialty(id, field, value) {
+            specialties = specialties.map(s => s.id === id ? {...s, [field]: value} : s);
+            calculateTotal();
+        }
+
+        function calculateFee(count) {
+            count = parseInt(count) || 0;
+            if (count <= 30) return count * 11;
+            return 30 * 11 + (count - 30) * 30;
+        }
+
+        function calculateTotal() {
+            const total = specialties.reduce((sum, s) => sum + calculateFee(s.count), 0);
+            document.getElementById('totalFee').innerText = `Total Estimated Fee: $${total}`;
+        }
+
+        renderSpecialties();
+    </script>
+</body>
+</html>
