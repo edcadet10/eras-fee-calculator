@@ -42,6 +42,7 @@
             padding: 8px 15px;
             cursor: pointer;
             border-radius: 4px;
+            margin-right: 10px;
         }
         button:hover {
             background-color: #2C3E50;
@@ -57,6 +58,11 @@
             font-size: 0.8em;
             color: #666;
         }
+        .citation {
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -65,7 +71,11 @@
         <p>Enter your specialties and program counts below to calculate your fees.</p>
         <div id="specialties"></div>
         <button onclick="addSpecialty()">Add Specialty</button>
+        <button onclick="resetCalculator()">Reset</button>
         <div class="total-fee" id="totalFee"></div>
+        <div class="citation">
+            Fee information based on <a href="https://students-residents.aamc.org/applying-residencies-eras/fees-eras-residency-applications" target="_blank">AAMC ERAS® Residency Application Fees</a>
+        </div>
     </div>
 
     <div class="signature">
@@ -111,6 +121,11 @@
         function calculateTotal() {
             const total = specialties.reduce((sum, s) => sum + calculateFee(s.count), 0);
             document.getElementById('totalFee').innerText = `Total Estimated Fee: $${total}`;
+        }
+
+        function resetCalculator() {
+            specialties = [{ id: 1, specialty: '', count: 0 }];
+            renderSpecialties();
         }
 
         renderSpecialties();
