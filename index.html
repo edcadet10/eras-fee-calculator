@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2025 ERAS® Residency Fee Calculator</title>
+    <title>2025 ERAS® Residency and Fellowship Fee Calculator</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -28,7 +28,7 @@
             display: flex;
             margin-bottom: 10px;
         }
-        input {
+        input, select {
             flex-grow: 1;
             padding: 8px;
             margin-right: 10px;
@@ -63,18 +63,29 @@
             color: #666;
             margin-top: 20px;
         }
+        .calculator-type {
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
     <div class="calculator">
-        <h1>2025 ERAS® Residency Fee Calculator</h1>
+        <h1>2025 ERAS® Residency and Fellowship Fee Calculator</h1>
+        <div class="calculator-type">
+            <label>
+                <input type="radio" name="calculatorType" value="residency" checked onchange="changeCalculatorType()"> Residency
+            </label>
+            <label>
+                <input type="radio" name="calculatorType" value="fellowship" onchange="changeCalculatorType()"> Fellowship
+            </label>
+        </div>
         <p>Enter your specialties and program counts below to calculate your fees.</p>
         <div id="specialties"></div>
         <button onclick="addSpecialty()">Add Specialty</button>
         <button onclick="resetCalculator()">Reset</button>
         <div class="total-fee" id="totalFee"></div>
         <div class="citation">
-            Fee information based on <a href="https://students-residents.aamc.org/applying-residencies-eras/fees-eras-residency-applications" target="_blank">AAMC ERAS® Residency Application Fees</a>
+            Fee information based on <a href="https://students-residents.aamc.org/applying-residencies-eras/fees-eras-residency-applications" target="_blank">AAMC ERAS® Residency Application Fees</a> and <a href="https://students-residents.aamc.org/applying-fellowships-eras/fees-eras-fellowship-applications" target="_blank">AAMC ERAS® Fellowship Application Fees</a>
         </div>
     </div>
 
@@ -84,6 +95,7 @@
 
     <script>
         let specialties = [{ id: 1, specialty: '', count: 0 }];
+        let calculatorType = 'residency';
 
         function renderSpecialties() {
             const specialtiesDiv = document.getElementById('specialties');
@@ -112,20 +124,42 @@
             calculateTotal();
         }
 
-        function calculateFee(count) {
+        function calculateResidencyFee(count) {
             count = parseInt(count) || 0;
             if (count <= 30) return count * 11;
             return 30 * 11 + (count - 30) * 30;
         }
 
+        function calculateFellowshipFee(count) {
+            count = parseInt(count) || 0;
+            let fee = 0;
+            if (count <= 10) {
+                fee = 115;
+            } else if (count <= 20) {
+                fee = 115 + (count - 10) * 17;
+            } else if (count <= 30) {
+                fee = 115 + 10 * 17 + (count - 20) * 20;
+            } else {
+                fee = 115 + 10 * 17 + 10 * 20 + (count - 30) * 27;
+            }
+            return fee;
+        }
+
         function calculateTotal() {
-            const total = specialties.reduce((sum, s) => sum + calculateFee(s.count), 0);
+            const total = specialties.reduce((sum, s) => {
+                return sum + (calculatorType === 'residency' ? calculateResidencyFee(s.count) : calculateFellowshipFee(s.count));
+            }, 0);
             document.getElementById('totalFee').innerText = `Total Estimated Fee: $${total}`;
         }
 
         function resetCalculator() {
             specialties = [{ id: 1, specialty: '', count: 0 }];
             renderSpecialties();
+        }
+
+        function changeCalculatorType() {
+            calculatorType = document.querySelector('input[name="calculatorType"]:checked').value;
+            calculateTotal();
         }
 
         renderSpecialties();
