@@ -63,8 +63,12 @@
             color: #666;
             margin-top: 20px;
         }
-        .calculator-type {
+        .calculator-type, .exam-fee-options {
             margin-bottom: 20px;
+        }
+        .exam-fee-options label {
+            display: block;
+            margin-bottom: 5px;
         }
     </style>
 </head>
@@ -77,6 +81,14 @@
             </label>
             <label>
                 <input type="radio" name="calculatorType" value="fellowship" onchange="changeCalculatorType()"> Fellowship
+            </label>
+        </div>
+        <div class="exam-fee-options">
+            <label>
+                <input type="checkbox" id="usmleFee" onchange="calculateTotal()"> Add USMLE Fee ($80)
+            </label>
+            <label>
+                <input type="checkbox" id="comlexFee" onchange="calculateTotal()"> Add COMLEX Fee ($80)
             </label>
         </div>
         <p>Enter your specialties and program counts below to calculate your fees.</p>
@@ -146,14 +158,27 @@
         }
 
         function calculateTotal() {
-            const total = specialties.reduce((sum, s) => {
+            let total = specialties.reduce((sum, s) => {
                 return sum + (calculatorType === 'residency' ? calculateResidencyFee(s.count) : calculateFellowshipFee(s.count));
             }, 0);
+
+            const usmleCheckbox = document.getElementById('usmleFee');
+            const comlexCheckbox = document.getElementById('comlexFee');
+
+            if (usmleCheckbox.checked) {
+                total += 80;
+            }
+            if (comlexCheckbox.checked) {
+                total += 80;
+            }
+
             document.getElementById('totalFee').innerText = `Total Estimated Fee: $${total}`;
         }
 
         function resetCalculator() {
             specialties = [{ id: 1, specialty: '', count: 0 }];
+            document.getElementById('usmleFee').checked = false;
+            document.getElementById('comlexFee').checked = false;
             renderSpecialties();
         }
 
